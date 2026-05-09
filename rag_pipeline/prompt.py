@@ -18,7 +18,7 @@ def build_prompt(contexts, query, answer_language="English"):
         f"Answer in {answer_language}.\n\n"
         "Use only the information in the context below. "
         "If the answer is not clearly supported by the context, say: "
-        "'The provided documents do not contain the answer.'\n\n"
+        "The provided documents do not contain the answer.\n\n"
         f"Context:\n{context_str}\n\n"
         f"Question: {query}"
     )

@@ -12,16 +12,9 @@ MODEL_CACHE_DIR = os.path.expanduser(
     "~/.cache/huggingface/hub/models--LGAI-EXAONE--EXAONE-3.5-2.4B-Instruct/snapshots/"
     + MODEL_REVISION
 )
+_IS_LOCAL = os.path.isdir(MODEL_CACHE_DIR)
 MODEL_SOURCE = MODEL_CACHE_DIR if os.path.isdir(MODEL_CACHE_DIR) else MODEL_ID
 HF_MODULES_CACHE = os.environ.get("HF_MODULES_CACHE", "/tmp/hf_modules_cache")
-os.environ["HF_MODULES_CACHE"] = HF_MODULES_CACHE
-os.makedirs(HF_MODULES_CACHE, exist_ok=True)
-dynamic_module_utils.HF_MODULES_CACHE = HF_MODULES_CACHE
-
-print(f"[INFO] Loading Language Model: {MODEL_ID}")
-print(f"[INFO] Model Revision: {MODEL_REVISION}")
-print("[INFO] Infrastructure: CPU-Optimized (16 Cores)")
-print(f"[INFO] Model Source: {MODEL_SOURCE}")
 
 tokenizer = None
 model = None
@@ -32,19 +25,28 @@ def _ensure_pipeline():
     if model is not None and tokenizer is not None:
         return tokenizer, model
 
+    os.environ["HF_MODULES_CACHE"] = HF_MODULES_CACHE
+    os.makedirs(HF_MODULES_CACHE, exist_ok=True)
+    dynamic_module_utils.HF_MODULES_CACHE = HF_MODULES_CACHE
+
+    print(f"[INFO] Loading Language Model: {MODEL_ID}")
+    print(f"[INFO] Model Revision: {MODEL_REVISION}")
+    print("[INFO] Infrastructure: CPU-Optimized (16 Cores)")
+    print(f"[INFO] Model Source: {MODEL_SOURCE}")
+
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_SOURCE,
         revision=MODEL_REVISION,
-        local_files_only=True,
+        local_files_only=_IS_LOCAL,
     )
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_SOURCE,
         revision=MODEL_REVISION,
         code_revision=MODEL_REVISION,
-        dtype=torch.bfloat16,
+        torch_dtype=torch.bfloat16,
         device_map="cpu",
         trust_remote_code=True,
-        local_files_only=True,
+        local_files_only=_IS_LOCAL,
     )
     return tokenizer, model
 
@@ -62,7 +64,7 @@ def generate_with_meta(prompt, answer_language="English", debug=False):
                 "Answer only from the retrieved context. "
                 "Do not use outside knowledge or guess. "
                 "If the context is insufficient, reply exactly: "
-                "'The provided documents do not contain the answer.' "
+                "The provided documents do not contain the answer. "
                 f"Answer in {answer_language}."
             ),
         },
@@ -100,7 +102,7 @@ def generate_with_meta(prompt, answer_language="English", debug=False):
     generated_ids = output_ids[0][input_ids.shape[1]:]
     response = tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
     full_output = tokenizer.decode(output_ids[0], skip_special_tokens=False)
-    output_token_count = len(tokenizer.encode(response))
+    output_token_count = int(generated_ids.shape[0])
     throughput = 0.0 if duration <= 0 else output_token_count / duration
 
     if debug:
