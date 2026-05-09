@@ -68,10 +68,10 @@ def choose_default_artifacts(
         return chunks_path, index_path
 
     if chunks_path and not index_path:
-        raise FileNotFoundError("index_path must be provided when chunks_path is set.")
+        raise ValueError("index_path must be provided when chunks_path is set.")
 
     if index_path and not chunks_path:
-        raise FileNotFoundError("chunks_path must be provided when index_path is set.")
+        raise ValueError("chunks_path must be provided when index_path is set.")
 
     preferred_pairs = [
         (DEFAULT_TEXT_CHUNKS_PATH, DEFAULT_TEXT_INDEX_PATH),

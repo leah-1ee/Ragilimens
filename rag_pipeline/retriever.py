@@ -30,6 +30,7 @@ def retrieve(query, index, chunks, metadata_filter=None, k=3, bm25=None):
     if bm25 is None:
         # BM25 없이 FAISS 단독 검색
         candidate_ids = list(faiss_ids)
+        candidate_ids = [i for i in candidate_ids if i >= 0]
         if metadata_filter is None:
             return [chunks[i] for i in candidate_ids[:k]]
         # metadata_filter 적용
@@ -49,11 +50,11 @@ def retrieve(query, index, chunks, metadata_filter=None, k=3, bm25=None):
 
     # RRF 점수 계산
     rrf: dict[int, float] = {}
-    for rank, idx in enumerate(faiss_ids):
+    for rank, idx in enumerate(faiss_ids, start=1):
         if idx < 0:
             continue
         rrf[idx] = rrf.get(idx, 0.0) + _rrf_score(rank)
-    for rank, idx in enumerate(bm25_ids):
+    for rank, idx in enumerate(bm25_ids, start=1):
         rrf[idx] = rrf.get(idx, 0.0) + _rrf_score(rank)
 
     # RRF 점수 내림차순 정렬
