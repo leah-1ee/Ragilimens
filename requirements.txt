@@ -1,0 +1,12 @@
+langchain
+langchain-community
+langchain-text-splitters
+sentence-transformers
+faiss-cpu
+rank-bm25
+transformers
+torch
+datasets
+requests
+beautifulsoup4
+cinemagoer
