@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+
+# Logs / temp / backup
+*.log
+*.tmp
+*.bak
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Config and tokens
+.env
+.env.*
