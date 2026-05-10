@@ -156,7 +156,6 @@ print([doc["source_file"] for doc in result["docs"]])
 ## 현재 한계
 - 일부 질문에서는 retrieval이 충분한 근거를 못 찾을 수 있습니다.
 - Harry Potter 데이터셋 특성상 이름 언급만 있는 청크가 섞이면 answer 품질이 흔들릴 수 있습니다.
-- 실무용 제품보다는 실험/연구용 코드에 더 가깝습니다.
 
 ## 문서 안내
 - 실행/운영/평가 기준: `RAG_PIPELINE.md`
