@@ -38,6 +38,7 @@ def _ensure_pipeline():
         MODEL_SOURCE,
         revision=MODEL_REVISION,
         local_files_only=_IS_LOCAL,
+        trust_remote_code=True,
     )
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_SOURCE,
