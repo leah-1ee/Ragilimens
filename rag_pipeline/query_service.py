@@ -78,6 +78,8 @@ def retrieve_documents(
 ) -> Dict[str, Any]:
     if not query.strip():
         raise ValueError("query must not be empty")
+    if top_k < 1:
+        raise ValueError(f"top_k must be >= 1, got {top_k}")
 
     config = selected_config or get_default_config()
     if config is None:
@@ -92,8 +94,7 @@ def retrieve_documents(
     chunks_path = runtime_bundle["chunks_path"]
     index_path = runtime_bundle["index_path"]
 
-    bm25 = None
-    if retriever_name in {"bm25", "hybrid"}:
+    if retriever_name == "bm25":
         bm25 = _build_bm25(chunks_path, index_path)
 
     if retriever_name == "hybrid":
@@ -106,15 +107,29 @@ def retrieve_documents(
         retrieved_docs = hybrid_retriever.invoke(query, metadata_filter=metadata_filter)
         docs = [_document_to_chunk(doc) for doc in retrieved_docs]
     elif retriever_name == "faiss":
-        q_vec = model.encode([query])
-        ids = index.search(q_vec, min(top_k * 10, len(chunks)))[1][0]
-        docs = [chunks[i] for i in ids if i >= 0][:top_k]
+        if not chunks:
+            docs = []
+        else:
+            q_vec = model.encode([query])
+            ids = index.search(q_vec, min(top_k * 10, len(chunks)))[1][0]
+            docs = [chunks[i] for i in ids if i >= 0][:top_k]
+        if metadata_filter:
+            docs = [c for c in docs if all(
+                c.get("metadata", {}).get(k) == v
+                for k, v in metadata_filter.items()
+            )]
     elif retriever_name == "bm25":
         if bm25 is None:
             raise RuntimeError("BM25 index was not initialized.")
         scores = bm25.get_scores(query.split())
         ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
-        docs = [chunks[i] for i in ranked[:top_k]]
+        docs = [chunks[i] for i in ranked]
+        if metadata_filter:
+            docs = [c for c in docs if all(
+                c.get("metadata", {}).get(k) == v
+                for k, v in metadata_filter.items()
+            )]
+        docs = docs[:top_k]
     else:
         raise ValueError(f"Unsupported retriever: {retriever_name}")
 
