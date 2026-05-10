@@ -33,8 +33,20 @@ def main() -> None:
         print(f"{i}) {config['label']}")
 
     default_idx = next((i for i, c in enumerate(configs, 1) if c["label"] == "structure_text_512"), 1)
-    config_idx = input(f"\nSelect (1-{len(configs)}) [default: {default_idx}]: ").strip()
-    config_idx = int(config_idx) - 1 if config_idx else default_idx - 1
+    raw = input(f"\nSelect (1-{len(configs)}) [default: {default_idx}]: ").strip()
+    if not raw:
+        config_idx = default_idx - 1
+    else:
+        try:
+            parsed = int(raw)
+            if 1 <= parsed <= len(configs):
+                config_idx = parsed - 1
+            else:
+                print(f"[WARN] 범위를 벗어난 입력입니다. 기본값 {default_idx}번으로 설정합니다.")
+                config_idx = default_idx - 1
+        except ValueError:
+            print(f"[WARN] 숫자를 입력해주세요. 기본값 {default_idx}번으로 설정합니다.")
+            config_idx = default_idx - 1
     selected_config = configs[config_idx]
 
     print(f"\n→ Using: {retriever} + {selected_config['label']}")
