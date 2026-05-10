@@ -23,15 +23,23 @@ def print_boxed_response(text):
     print("| " + "FINAL AI RESPONSE".center(width + 2) + " |")
     print(border)
     for line in lines:
-        # 긴 문장은 자르거나 그대로 출력 (데모용이므로 간단히 처리)
+        if len(line) > width:
+            line = line[:width - 3] + "..."
         print(f"|  {line.ljust(width)}  |")
     print(border + "\n")
+
+def positive_int(value):
+    ivalue = int(value)
+    if ivalue < 1:
+        raise argparse.ArgumentTypeError(f"--k must be >= 1, got {ivalue}")
+    return ivalue
+
 
 def main():
     parser = argparse.ArgumentParser(description="Harry Potter RAG System")
     parser.add_argument("--query", type=str, default="Tell me about Harry Potter", help="User Query")
     parser.add_argument("--filter", type=str, default=None, help="Metadata Filter (JSON)")
-    parser.add_argument("--k", type=int, default=3, help="Number of chunks to retrieve")
+    parser.add_argument("--k", type=positive_int, default=3, help="Number of chunks to retrieve")
     parser.add_argument("--chunks-path", type=str, default=None, help="Chunk metadata JSON path")
     parser.add_argument("--index-path", type=str, default=None, help="FAISS index path")
     parser.add_argument(
