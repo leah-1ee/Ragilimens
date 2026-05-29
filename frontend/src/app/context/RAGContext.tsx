@@ -1,6 +1,16 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 
-export type ProcessingState = 'idle' | 'searching' | 'retrieving' | 'generating' | 'completed' | 'error';
+const API_BASE_URL =
+  import.meta.env.VITE_RAG_API_BASE_URL ?? 'http://localhost:8000';
+
+export type ProcessingState =
+  | 'idle'
+  | 'searching'
+  | 'retrieving'
+  | 'generating'
+  | 'completed'
+  | 'error';
 
 export interface RetrievalConfig {
   method: 'hybrid' | 'faiss' | 'bm25';
@@ -32,18 +42,17 @@ export interface RAGResult {
 
 interface RAGContextType {
   query: string;
-  setQuery: (query: string) => void;
+  setQuery: Dispatch<SetStateAction<string>>;
   config: RetrievalConfig;
-  setConfig: (config: RetrievalConfig) => void;
+  setConfig: Dispatch<SetStateAction<RetrievalConfig>>;
   processingState: ProcessingState;
-  setProcessingState: (state: ProcessingState) => void;
+  setProcessingState: Dispatch<SetStateAction<ProcessingState>>;
   result: RAGResult | null;
-  setResult: (result: RAGResult | null) => void;
+  setResult: Dispatch<SetStateAction<RAGResult | null>>;
   debugLogs: string[];
-  setDebugLogs: (logs: string[]) => void;
-  addLog: (log: string) => void;
+  setDebugLogs: Dispatch<SetStateAction<string[]>>;
   errorMessage: string;
-  setErrorMessage: (message: string) => void;
+  setErrorMessage: Dispatch<SetStateAction<string>>;
   performSearch: () => Promise<void>;
   resetState: () => void;
 }
@@ -58,10 +67,12 @@ export function RAGProvider({ children }: { children: ReactNode }) {
     topK: 3,
     chunkConfig: 'structure_text_512',
   });
-  const [processingState, setProcessingState] = useState<ProcessingState>('idle');
+
+  const [processingState, setProcessingState] =
+    useState<ProcessingState>('idle');
   const [result, setResult] = useState<RAGResult | null>(null);
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const addLog = (log: string) => {
     setDebugLogs(prev => [...prev, log]);
@@ -77,73 +88,109 @@ export function RAGProvider({ children }: { children: ReactNode }) {
     try {
       setErrorMessage('');
       setDebugLogs([]);
+      setResult(null);
+
       addLog('[INFO] Initializing RAG System Components...');
       addLog(`[QUERY] ${query}`);
 
-      setProcessingState('searching');
-      addLog('[PROCESS] Searching for relevant document chunks (Hybrid Search: BM25 + Vector)...');
+      let metadataFilter: Record<string, unknown> | null = null;
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (config.metadataFilter?.trim()) {
+        try {
+          metadataFilter = JSON.parse(config.metadataFilter);
+        } catch {
+          setErrorMessage('Metadata filter must be valid JSON');
+          setProcessingState('idle');
+          addLog('[ERROR] Metadata filter must be valid JSON');
+          return;
+        }
+      }
+
+      setProcessingState('searching');
+      addLog(
+        `[PROCESS] Sending query to RAG backend using ${config.method} retrieval...`
+      );
+
+      const response = await fetch(`${API_BASE_URL}/api/rag/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query,
+          retriever_name: config.method,
+          answer_language: config.language,
+          top_k: config.topK,
+          selected_config: config.chunkConfig,
+          metadata_filter: metadataFilter,
+        }),
+      });
 
       setProcessingState('retrieving');
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const mockChunksPath = `data/text/processed/chunks_${config.chunkConfig}_metadata.json`;
-      const mockIndexPath = `vector_db/faiss_text_${config.chunkConfig}.index`;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
 
-      addLog(`[INFO] Chunks Path: ${mockChunksPath}`);
-      addLog(`[INFO] Index Path: ${mockIndexPath}`);
+        let message = `Request failed with status ${response.status}`;
 
-      const mockDocs: DocumentChunk[] = [
-        {
-          source_file: 'Book1.txt',
-          text: 'The Dursleys had a small son called Dudley and in their opinion there was no finer boy anywhere. Dudley was a spoiled child who got everything he wanted from his parents.'
-        },
-        {
-          source_file: 'Book4.txt',
-          text: 'Dudley had reached roughly the size and weight of a young killer whale. He spent much of his time complaining about his diet and demanding more food.'
-        },
-        {
-          source_file: 'Book7.txt',
-          text: 'Dudley looked frightened and uncertain as the Dursleys prepared to leave Privet Drive. He had just shaken hands with Harry, a gesture that surprised everyone.'
+        if (typeof errorData?.detail === 'string') {
+          message = errorData.detail;
+        } else if (errorData?.detail?.message) {
+          message = errorData.detail.message;
         }
-      ];
 
-      addLog(`[INFO] Database: ${mockDocs.length} chunks retrieved`);
-      addLog(`[DEBUG] Hybrid Retrieval completed in 5.7553s`);
+        throw new Error(message);
+      }
 
       setProcessingState('generating');
-      addLog('[PROCESS] Generating answer with local LLM (EXAONE 3.5)...');
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const data = await response.json();
 
-      const mockAnswer = config.language === 'Korean'
-        ? '더들리 더즐리는 해리 포터의 사촌입니다. 그는 버논과 페투니아 더즐리의 아들이며 프리벳 가에서 함께 살았습니다. 검색된 맥락에 따르면, 더들리는 더즐리 가족의 일원으로 묘사되며 마법 세계 밖에서의 해리의 초기 삶과 관련하여 등장합니다.'
-        : 'Dudley Dursley is Harry Potter\'s cousin. He is the son of Vernon and Petunia Dursley and lives with them at Privet Drive. In the retrieved context, Dudley is described as part of the Dursley family and appears in relation to Harry\'s early life outside the wizarding world. He is portrayed as a spoiled child who was overweight and often cruel to Harry.';
+      const docs: DocumentChunk[] = Array.isArray(data.docs)
+        ? data.docs.map((doc: Partial<DocumentChunk>) => ({
+            source_file: doc.source_file ?? 'unknown',
+            text: doc.text ?? '',
+          }))
+        : [];
 
-      addLog(`[DEBUG] Generation completed in 8.3241s`);
+      const sources: string[] = Array.isArray(data.sources)
+        ? data.sources
+        : Array.from(new Set(docs.map(doc => doc.source_file)));
 
-      const mockResult: RAGResult = {
-        query,
-        answer: mockAnswer,
-        retriever_name: config.method,
-        answer_language: config.language,
-        top_k: config.topK,
-        selected_config: config.chunkConfig,
-        chunks_path: mockChunksPath,
-        index_path: mockIndexPath,
-        retrieval_time: 5.7553,
-        generation_time: 8.3241,
-        docs: mockDocs.slice(0, config.topK),
-        sources: Array.from(new Set(mockDocs.slice(0, config.topK).map(d => d.source_file)))
+      const normalizedResult: RAGResult = {
+        query: data.query ?? query,
+        answer: data.answer ?? '',
+        retriever_name: data.retriever_name ?? config.method,
+        answer_language: data.answer_language ?? config.language,
+        top_k: Number(data.top_k ?? config.topK),
+        selected_config: data.selected_config ?? config.chunkConfig,
+        chunks_path: data.chunks_path ?? '',
+        index_path: data.index_path ?? '',
+        retrieval_time: Number(data.retrieval_time ?? 0),
+        generation_time: Number(data.generation_time ?? 0),
+        docs,
+        sources,
       };
 
-      setResult(mockResult);
+      addLog(`[INFO] Chunks Path: ${normalizedResult.chunks_path}`);
+      addLog(`[INFO] Index Path: ${normalizedResult.index_path}`);
+      addLog(`[INFO] Database: ${normalizedResult.docs.length} chunks retrieved`);
+      addLog(
+        `[DEBUG] Retrieval completed in ${normalizedResult.retrieval_time.toFixed(4)}s`
+      );
+      addLog(
+        `[DEBUG] Generation completed in ${normalizedResult.generation_time.toFixed(4)}s`
+      );
+
+      setResult(normalizedResult);
       setProcessingState('completed');
       addLog('[SUCCESS] Answer generated successfully');
     } catch (error) {
       setProcessingState('error');
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+
+      const errorMsg =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
       setErrorMessage(`Failed to generate answer: ${errorMsg}`);
       addLog(`[ERROR] ${errorMsg}`);
     }
@@ -151,8 +198,8 @@ export function RAGProvider({ children }: { children: ReactNode }) {
 
   const resetState = () => {
     setQuery('');
-    setResult(null);
     setProcessingState('idle');
+    setResult(null);
     setDebugLogs([]);
     setErrorMessage('');
   };
@@ -170,7 +217,6 @@ export function RAGProvider({ children }: { children: ReactNode }) {
         setResult,
         debugLogs,
         setDebugLogs,
-        addLog,
         errorMessage,
         setErrorMessage,
         performSearch,
@@ -184,8 +230,10 @@ export function RAGProvider({ children }: { children: ReactNode }) {
 
 export function useRAG() {
   const context = useContext(RAGContext);
+
   if (context === undefined) {
     throw new Error('useRAG must be used within a RAGProvider');
   }
+
   return context;
 }
