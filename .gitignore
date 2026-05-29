@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+
+# Logs / temp / backup
+*.log
+*.tmp
+*.bak
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Config and tokens
+.env
+.env.*
+
+# Python virtual environment
+.venv/
+venv/
+.python-version
+
+# Data and indexes (large / generated files)
+vector_db/*.index
+data/
+
+# Evaluation outputs
+results/
