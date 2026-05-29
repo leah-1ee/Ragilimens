@@ -16,7 +16,7 @@ export function Header() {
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 text-[#d4af37]" />
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#f4c430]" style={{ fontFamily: 'Cinzel, serif' }}>
-              Harry Potter RAG Demo Dashboard
+              Harry Potter RAG Q&A System
             </h1>
           </div>
           <p className="text-base sm:text-lg text-[#d4af37]/80" style={{ fontFamily: 'Philosopher, serif' }}>

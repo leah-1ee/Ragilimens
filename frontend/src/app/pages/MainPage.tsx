@@ -23,10 +23,10 @@ export function MainPage() {
 
           <div className="space-y-4">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#d4af37]" style={{ fontFamily: 'Cinzel, serif', letterSpacing: '0.05em' }}>
-              Harry Potter RAG
+              RAGILIMENTS
             </h1>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#f4c430]" style={{ fontFamily: 'Cinzel, serif' }}>
-              Demo Dashboard
+              Harry Potter RAG Q&A System
             </h2>
             <p className="text-lg sm:text-xl text-[#d4af37]/80 max-w-2xl mx-auto" style={{ fontFamily: 'Philosopher, serif' }}>
               Ask questions grounded in Harry Potter text data using hybrid retrieval and local LLM generation.
