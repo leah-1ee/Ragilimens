@@ -28,7 +28,7 @@ export function DebugLogs({ logs }: DebugLogsProps) {
   };
 
   return (
-    <Card className="shadow-lg bg-[#0a0e27] border-2 border-[#d4af37]/30">
+    <Card className="shadow-lg bg-[#05071a]/88 backdrop-blur-md border-2 border-[#d4af37]/30">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-3">
           <CollapsibleTrigger asChild>

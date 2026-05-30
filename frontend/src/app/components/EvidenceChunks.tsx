@@ -22,7 +22,7 @@ function ChunkCard({ chunk, index }: { chunk: DocumentChunk; index: number }) {
   };
 
   return (
-    <Card className="border-l-4 border-l-[#d4af37] bg-[#1a1d3a] border-[#d4af37]/30">
+    <Card className="border-l-4 border-l-[#d4af37] bg-[#080b24]/64 backdrop-blur-md border-[#d4af37]/30">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
@@ -75,7 +75,7 @@ function ChunkCard({ chunk, index }: { chunk: DocumentChunk; index: number }) {
 export function EvidenceChunks({ docs }: EvidenceChunksProps) {
   if (!docs || docs.length === 0) {
     return (
-      <Card className="shadow-lg border-2 border-dashed border-[#d4af37]/30 bg-[#1a1d3a]">
+      <Card className="shadow-lg border-2 border-dashed border-[#d4af37]/30 bg-[#080b24]/64 backdrop-blur-md">
         <CardContent className="py-12 text-center">
           <FileText className="w-12 h-12 mx-auto text-[#d4af37]/40 mb-3" />
           <p className="text-[#d4af37]/60" style={{ fontFamily: 'Philosopher, serif' }}>

@@ -21,7 +21,7 @@ export function FinalResponse({ result, onRegenerate, processingState }: FinalRe
 
   if (!result && processingState === 'idle') {
     return (
-      <Card className="shadow-lg border-2 border-dashed border-[#d4af37]/30 bg-[#1a1d3a]">
+      <Card className="shadow-lg border-2 border-dashed border-[#d4af37]/30 bg-[#080b24]/64 backdrop-blur-md">
         <CardContent className="py-16 text-center">
           <MessageSquare className="w-16 h-16 mx-auto text-[#d4af37]/40 mb-4" />
           <p className="text-lg text-[#d4af37]/60" style={{ fontFamily: 'Philosopher, serif' }}>
@@ -34,7 +34,7 @@ export function FinalResponse({ result, onRegenerate, processingState }: FinalRe
 
   if (processingState === 'searching' || processingState === 'retrieving' || processingState === 'generating') {
     return (
-      <Card className="shadow-lg bg-[#1a1d3a] border-2 border-[#d4af37]/30">
+      <Card className="shadow-lg bg-[#080b24]/64 backdrop-blur-md border-2 border-[#d4af37]/30">
         <CardContent className="py-16">
           <div className="space-y-4 animate-pulse">
             <div className="h-4 bg-[#d4af37]/20 rounded w-3/4" />
@@ -48,7 +48,7 @@ export function FinalResponse({ result, onRegenerate, processingState }: FinalRe
 
   if (processingState === 'error') {
     return (
-      <Card className="shadow-lg border-2 border-red-500/50 bg-[#1a1d3a]">
+      <Card className="shadow-lg border-2 border-red-500/50 bg-[#080b24]/64 backdrop-blur-md">
         <CardContent className="py-12 text-center">
           <div className="text-red-500 mb-4">
             <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +67,7 @@ export function FinalResponse({ result, onRegenerate, processingState }: FinalRe
   if (!result) return null;
 
   return (
-    <Card className="shadow-lg border-2 border-[#d4af37] bg-[#1a1d3a] relative overflow-hidden">
+    <Card className="shadow-lg border-2 border-[#d4af37] bg-[#080b24]/64 backdrop-blur-md relative overflow-hidden">
       {/* Decorative corners */}
       <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-[#d4af37] opacity-30" />
       <div className="absolute top-0 right-0 w-20 h-20 border-t-2 border-r-2 border-[#d4af37] opacity-30" />

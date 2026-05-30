@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Header } from '../components/Header';
 import { QueryInput } from '../components/QueryInput';
@@ -8,6 +8,7 @@ import { useRAG } from '../context/RAGContext';
 
 export function AskQuestionPage() {
   const navigate = useNavigate();
+
   const {
     query,
     setQuery,
@@ -17,7 +18,6 @@ export function AskQuestionPage() {
     errorMessage,
     setErrorMessage,
     performSearch,
-    resetState,
   } = useRAG();
 
   const [showProcessing, setShowProcessing] = useState(false);
@@ -37,7 +37,6 @@ export function AskQuestionPage() {
     setErrorMessage('');
   };
 
-  // Navigate to results when processing is completed
   useEffect(() => {
     if (processingState === 'completed') {
       setShowProcessing(false);
@@ -45,17 +44,25 @@ export function AskQuestionPage() {
     }
   }, [processingState, navigate]);
 
-  // Close dialog on error
   useEffect(() => {
     if (processingState === 'error') {
       setShowProcessing(false);
     }
   }, [processingState]);
 
-  const isProcessing = processingState !== 'idle' && processingState !== 'completed' && processingState !== 'error';
+  const isProcessing =
+    processingState !== 'idle' &&
+    processingState !== 'completed' &&
+    processingState !== 'error';
 
   return (
-    <div className="min-h-screen">
+    <div
+      className="min-h-screen bg-cover bg-center bg-fixed"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(6, 8, 30, 0.62), rgba(6, 8, 30, 0.72)), url('/images/main-background.jpg')",
+      }}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-4 sm:space-y-6">
         <Header />
 
