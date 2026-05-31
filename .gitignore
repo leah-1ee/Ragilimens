@@ -27,3 +27,15 @@ data/
 
 # Evaluation outputs
 results/
+
+# Node dependencies
+node_modules/
+frontend/node_modules/
+
+# Keep environment examples
+!.env.example
+!frontend/.env.example
+
+# Frontend build output
+frontend/dist/
+dist/

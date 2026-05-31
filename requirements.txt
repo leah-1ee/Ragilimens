@@ -11,3 +11,6 @@ datasets
 requests
 beautifulsoup4
 cinemagoer
+fastapi
+uvicorn
+pydantic
