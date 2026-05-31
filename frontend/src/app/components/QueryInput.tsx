@@ -15,9 +15,9 @@ interface QueryInputProps {
 
 const exampleQuestions = [
   'Who is Dudley?',
-  'What is the Triwizard Tournament?',
-  'Who helped Harry in the first task?',
-  'What happened at the Ministry of Magic?',
+  'Who is Ginny Weasley?',
+  'What is the Marauder\'s Map?',
+  'What does the spell Expelliarmus do?',
 ];
 
 export function QueryInput({
